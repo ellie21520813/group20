@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userdb-deployment
+  labels:
+    name: userdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: userdb
+  template:
+    metadata:
+      labels:
+        service: userdb
+    spec:
+      containers:
+        - image: postgres:latest
+          imagePullPolicy: Always
+          name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: userdb-secret
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: userdb-secret
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: userdb-secret
+                  key: db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: userdb-volume-mount
+      volumes:
+        - name: userdb-volume-mount
+          persistentVolumeClaim:
+            claimName: userdb-pvc

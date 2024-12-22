@@ -1,0 +1,272 @@
+version: '3.7'
+
+services:
+  user-db:
+    image: "postgres:${POSTGRES_VERSION}"
+    restart: always
+  
+    volumes:
+      - postgre_data_user:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d user_db_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=user_db_dev
+    hostname: user-db
+    networks: 
+      - mynet
+
+  file-db:
+    image: "postgres:${POSTGRES_VERSION}"
+    restart: always
+    volumes:
+      - postgre_data_file:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d file_db_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=file_db_dev
+    hostname: file-db
+    networks: 
+      - mynet
+
+  task-db:
+    image: "postgres:${POSTGRES_VERSION}"
+    restart: always
+    volumes:
+      - postgre_data_task:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d task_db_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=task_db_dev
+    hostname: task-db
+    networks: 
+      - mynet
+  
+  device-db:
+    image: "postgres:${POSTGRES_VERSION}"
+    restart: always
+    volumes:
+      - postgre_data_device:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d device_db_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "${DEV_DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=device_db_dev
+    hostname: device-db
+    networks: 
+      - mynet
+
+  redis-server:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    hostname: redis-server
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 30s
+      retries: 5
+      timeout: 10s
+    volumes:
+      - cache:/data
+    networks:
+      - mynet
+
+  auth-service:
+    build:
+      context: ./auth-service
+      network: host
+    image: "${REGISTRY_URL}/auth-service"
+    restart: always
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./auth-service/:/app/
+    ports:
+      - ${AUTH_PORT}:8000
+    environment:
+      - DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@user-db/user_db_dev
+    hostname: auth-service
+    networks: 
+      - mynet
+    depends_on:
+      user-db:
+        condition: service_healthy
+      
+  
+  user-service:
+    build: 
+      context: ./user-service
+      network: host
+    image: "${REGISTRY_URL}/user-service"
+    restart: always
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./user-service/:/app/
+    ports:
+      - ${USER_PORT}:8000
+    environment:
+      - DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@user-db/user_db_dev
+    hostname: user-service
+    networks: 
+      - mynet
+    depends_on:
+      user-db:
+        condition: service_healthy
+  
+  file-service:
+    build: 
+      context: ./file-service
+      network: host
+    image: "${REGISTRY_URL}/file-service"
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    restart: always
+    volumes:
+      - ./file-service/:/app/
+    ports:
+      - ${FILE_PORT}:8000
+    environment:
+      - DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@file-db/file_db_dev
+    hostname: file-service
+    networks: 
+      - mynet
+    depends_on:
+      file-db:
+        condition: service_healthy
+
+  task-service:
+    build:
+      context: ./task-service
+      network: host
+    image: "${REGISTRY_URL}/task-service"
+    restart: always
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./task-service/:/app/
+    ports:
+      - ${TASK_PORT}:8000
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@task-db/task_db_dev
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
+      - RABBITMQ_HOST=rabbitmq
+    hostname: task-service
+    depends_on:
+      task-db:
+        condition: service_healthy
+    networks: 
+      - mynet
+
+  device-service:
+    build:
+      context: ./device-service
+      network: host
+    image: "${REGISTRY_URL}/device-service"
+    restart: always
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port ${DEVI_PORT}
+    volumes:
+      - ./device-service/:/app/
+    # ports:
+    #   - ${DEVI_PORT}:8000
+    #   - 8883:8883
+    environment:
+      - DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${DEV_DB_PORT}/device_db_dev
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASS=${MQTT_PASS}
+      - MQTT_HOST=${MQTT_HOST}
+      - MQTT_PORT=${MQTT_PORT}
+      - TZ="Asia/Ho_Chi_Minh"
+    hostname: device-service
+    network_mode: host
+    depends_on:
+      device-db:
+        condition: service_healthy
+    # networks: 
+    #   - mynet
+
+  camera-service:
+    build:
+      context: ./camera-service
+      network: host
+    image: "${REGISTRY_URL}/camera-service"
+    restart: always
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port ${CAM_PORT}
+    volumes:
+      - ./camera-service/:/app/
+    environment:
+      - TZ="Asia/Ho_Chi_Minh"
+    hostname: camera-service
+    network_mode: host
+
+  ui-app:
+    build: ./ui
+    image: "${REGISTRY_URL}/ui-app"
+    restart: always
+    command: serve build
+    volumes:
+      - ./ui/:/app/
+    networks: 
+      - mynet
+
+  spring-admin:
+    image: michayaak/spring-boot-admin:2.2.3-1
+    restart: always
+    ports:
+    - "8080:8080"
+    - "8081:8081"
+    hostname: spring-admin
+    networks: 
+      - mynet
+
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    command: /bin/bash -c "envsubst < /etc/nginx/conf.d/my-site.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    volumes:
+      - ./nginx/nginx-config.conf:/etc/nginx/conf.d/my-site.conf.template
+    depends_on:
+      - auth-service
+      - user-service
+      - task-service
+      - file-service
+      - camera-service
+      - device-service
+    networks: 
+      - mynet
+
+volumes:
+  postgre_data_user:
+  postgre_data_file:
+  postgre_data_task:
+  postgre_data_device:
+  cache:
+
+networks:
+  mynet:
+    driver: bridge

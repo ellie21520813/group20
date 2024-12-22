@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: userdb-svc
+  labels:
+    service: userdb-svc
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-port
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    service: userdb

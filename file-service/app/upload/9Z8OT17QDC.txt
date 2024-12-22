@@ -1,0 +1,6 @@
+172.31.5.37	orangepi-1
+172.31.5.103	orangepi-2
+172.31.5.38	orangepi-3
+172.31.5.100	orangepi-4
+172.31.5.102	orangepi-5
+172.31.5.109	orangepi-6

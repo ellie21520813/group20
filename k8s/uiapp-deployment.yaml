@@ -1,0 +1,91 @@
+# Deployment for uiapp
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uiapp-deploy
+  labels:
+    name: uiapp-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uiapp
+  template:
+    metadata:
+      labels:
+        app: uiapp
+    spec:
+      containers:
+      - name: uiapp
+        image: reg.uitiot.vn/mod-edge/ui-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+          - name: REACT_APP_API_URL
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-api-url
+          - name: REACT_APP_BASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-base-url
+          - name: ESLINT_NO_DEV_ERRORS
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: eslint-no-dev-errors
+          - name: REACT_APP_ASSETS_BUCKET
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-assets-bucket
+          - name: REACT_APP_BE
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-be
+          - name: REACT_APP_DEVICE_COMMAND_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-device-command-token
+          - name: REACT_APP_MQTT_CONNECTION
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-mqtt-connection
+          - name: REACT_APP_MQTT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-mqtt-password
+          - name: REACT_APP_MQTT_USER
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: react-app-mqtt-user
+          - name: TSC_COMPILE_ON_ERROR
+            valueFrom:
+              secretKeyRef:
+                name: uiapp-secret
+                key: tsc-compile-on-error
+      imagePullSecrets:
+        - name: regcred
+
+# Secret for Docker registry credentials
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJyZWcudWl0aW90LnZuIjogewoJCQkiYXV0aCI6ICJNakUxTWpJeE5URTZTMmh2Ym1kamFHOHgiCgkJfSwKCQkicmVnaXN0cnktaGFyYm9yLm5nb2RhdDAxMDMubWUiOiB7CgkJCSJhdXRoIjogImEyaGhZMmgxZVRwTVJ5Y2lNVGt5SVdKMlBsMURmajV3IgoJCX0KCX0KfQ==
+
+# Service for exposing the deployment
+
+

@@ -1,0 +1,80 @@
+<shared-auth-layout-component>
+    <section class="auth-layout-content auth-layout-login" [class.hidden]="isRegistrationMode">
+        <h1 class="login-title" *ngIf="!loginHeader; else loginHeader">
+            Sign In to your account </h1>
+        <div class="login-body">
+            <form class="form-horizontal" novalidate [formGroup]="loginForm" (submit)="submitLogin($event)">
+                <div class="form-group row" *ngIf="sessionExpired | async">
+                    <p class="col-md text-warning"> Session is expired,
+                        please login again. 
+                    </p>
+                </div>
+                <div class="form-group row" *ngIf="loginWarn">
+                    <p class="col-md text-warning"> <ng-container [ngTemplateOutlet]="loginWarn"></ng-container> </p>
+                </div> 
+                <form-group label="Login ID: " [hideLabel]="true"> 
+                    <mat-form-field floatPlaceholder="auto" class="float-auto"> 
+                        <input matInput formControlName="loginId" placeholder="Login ID"
+                            class="form-control" [type]="loginIdInputType" autocomplete="username">
+                    </mat-form-field>
+                    <p invalidInput="required">Login ID is required.</p>
+                </form-group>
+                <form-group label="Password: " [hideLabel]="true"> <mat-form-field floatPlaceholder="auto"
+                        class="float-auto"> <input matInput formControlName="password" #password placeholder="Password"
+                            class="form-control" type="password" autocomplete="current-password"> </mat-form-field>
+                    <p invalidInput="required">Password is required.</p>
+                </form-group> <a [routerLink]="forgotPasswordRouteObs |
+                    async" [skipLocationChange]="!!layoutModalWrappedAccessor" class="forgot-pass float-right"
+                    *ngIf="(forgotPasswordRouteObs | async).length">Forgot Password?</a>
+                <div class="checkbox
+                    inline-block" *ngIf="showRememberMe"> <mat-checkbox formControlName="rememberMe">
+                        Remember Me</mat-checkbox> </div> <button [disabled]="loginForm.disabled"
+                    href="javascript:void(0)" [class]="controlButtonStyle"> {{ signInText }}</button>
+                <ng-container *ngIf="loginOptionTemplate || (hasOAuthInfo | async)">
+                    <div class="login-options">
+                        <span>OR</span>
+                        <hr />
+                    </div>
+                    <div class="oauth-options"> <ng-template #tmDefaultOAuthButton let-oAuthItem> <a
+                                [href]="oAuthItem.authUrl" [class]="oAuthItem.buttonClass | async"
+                                [target]="oAuthItem.anchorTarget" (click)="oAuthItem.view($event)"> <i
+                                    [class]="oAuthItem.iconClass | async" *ngIf="oAuthItem.iconClass |
+                                    async"></i> Sign In with {{ oAuthItem.title || 'OAuth' }} </a>
+                        </ng-template> <ng-container *ngFor="let oAuthItem of oAuthInfo | async"
+                            [ngTemplateOutlet]="oAuthButton || tmDefaultOAuthButton" [ngTemplateOutletContext]="{
+                            $implicit: oAuthItem, defaultTemplate: tmDefaultOAuthButton }"> </ng-container>
+                    </div> <ng-container [ngTemplateOutlet]="loginOptionTemplate"></ng-container>
+                </ng-container>
+            </form>
+        </div>
+        <div class="login-footer p-t-15">
+            <p class="text-center shared-auth-navigator navigator-register" *ngIf="!hideDefaultRegisterControl
+                && registerForm && !loginForm.disabled"> Don't have an account? <a class="text-primary"
+                    href="javascript:void(0)" (click)="switchToRegister()"> Create an account </a> </p>
+            <ng-container [ngTemplateOutlet]="loginFooter"></ng-container>
+            <div class="loader loader-pink" *ngIf="loginForm.disabled"></div>
+        </div>
+    </section>
+    <section class="auth-layout-content auth-layout-register" [class.hidden]="!isRegistrationMode" *ngIf="registerForm">
+        <ul class="actions icons top-right" *ngIf="registrationHasClose &&
+            !registerForm.disabled">
+            <li class="button-register-cancel"> <a href="javascript:void(0)" (click)="switchToRegister(false)"
+                    class="text-primary" *ngIf="!registerCloseButton; else
+                    registerCloseButton"> <i class="zmdi zmdi-close"></i> </a> </li>
+        </ul>
+        <h1 class="login-title" *ngIf="!registerHeader; else registerHeader"> Create an account </h1>
+        <div class="login-body">
+            <form class="form-horizontal" novalidate [formGroup]="registerForm" (submit)="submitRegister($event)"
+                #regForm="ngForm"> <ng-content></ng-content> <button href="javascript:void(0)"
+                    [disabled]="registerForm.disabled" [class]="controlButtonStyle">
+                    {{ registerText }}</button> </form>
+        </div>
+        <div class="login-footer">
+            <p class="p-t-15 text-center shared-auth-navigator navigator-sign-in"
+                *ngIf="!hideDefaultLoginControl && !registerForm.disabled"> Already have an account? <a
+                    class="text-primary" href="javascript:void(0)" (click)="switchToRegister(false)"> Sign
+                    In</a> </p> <ng-container [ngTemplateOutlet]="registerFooter"></ng-container>
+            <div class="loader loader-pink" *ngIf="registerForm.disabled"></div>
+        </div>
+    </section>
+</shared-auth-layout-component>

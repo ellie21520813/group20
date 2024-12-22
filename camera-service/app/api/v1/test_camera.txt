@@ -1,0 +1,28 @@
+{
+  "ip": "192.168.31.95",
+  "port": 554,
+  "protocol": "rtsp",
+  "username": "admin",
+  "password": "BaoNV123",
+  "path": "/onvif1",
+  "owner": "baonv"
+}
+
+
+{
+  "ip": "192.168.31.149",
+  "port": 554,
+  "protocol": "rtsp",
+  "username": "admin",
+  "password": "EFVEZR",
+  "path": "/h264",
+  "owner": "baonv"
+}
+
+#!/bin/bash
+VIDSOURCE="rtsp://admin:EFVEZR@192.168.1.15:554/h264"
+AUDIO_OPTS="-c:a aac -b:a 160000 -ac 2"
+VIDEO_OPTS="-s 640:320 -c:v libx264 -b:v 800000"
+OUTPUT_HLS="-hls_time 1 -hls_list_size 10 -start_number 1"
+TIMEOUT=10000
+echo ffmpeg -i "$VIDSOURCE" -y $AUDIO_OPTS $VIDEO_OPTS $OUTPUT_HLS stream.m3u8
