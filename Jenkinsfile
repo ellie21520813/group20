@@ -6,54 +6,81 @@ pipeline {
   }
 
   environment {
+      HARBOR_REGISTRY = 'harbor.example.com'
       SCANNER_HOME= tool 'sonarqube-t3'
-      SONAR_URL= "http://3.89.57.237:9000"
+      SONAR_URL= ""
+      DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+      SERVICES = ['auth-service', 'camera-service', 'device-service', 'file-service', 'task-service', 'user-service', 'ui']
+      HARBOR_USERNAME =
+      HARBOR_PASSWORD =
+
   }
   stages {
     stage('Checkout') {
       steps {
-        sh 'echo passed 1'
-        git branch: 'main', changelog: false, poll: false, url: 'https://github.com/ellie21520813/deploywithk8s.git'
+        sh 'echo passed checkout'
+        git branch: 'main', changelog: false, poll: false, url: 'https://github.com/ellie21520813/group20'
       }
+    }
+
+    stage('login harbor') {
+        steps {
+            echo 'Login to Harbor registry'
+            sh" docker login ${HARBOR_REGISTRY} -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD}"
+        }
     }
 
     stage('Static Code Analysis') {
         steps {
-             sh '''
-	            $SCANNER_HOME/bin/sonar-scanner -X \
-            		-Dsonar.host.url=${SONAR_URL} \
-            		-Dsonar.login=squ_f4cfc4ce9aab476640c53b5680a9e409468c0271 \
-            		-Dsonar.projectName=task3\
-            		-Dsonar.java.binaries=. \
-            		-Dsonar.projectKey=task3 \
-
-            '''
-        }
-    }
-    stage('Docker Build for  be') {
-        steps {
             script {
-    			withDockerRegistry(credentialsId: '7ed71537-4773-4978-b9a0-79fada9e279d', toolName: 'docker') {
-    				sh """
-    				    cd backend
-    					docker build -t nh6462/lab2_be:latest .
-    					docker push nh6462/lab2_be:latest
-    					cd .. && cd frontend
-    					docker build -t nh6462/lab2_fe:latest .
-    					docker push nh6462/lab2_fe:latest
-    				"""
+                for (service in SERVICES) {
+                    echo "Running SonarQube analysis for ${service}"
+                    def sourceDir = (service == 'ui') ? 'src' : 'app'
+                        dir("${service}") {
+                            withSonarQubeEnv('SonarQube') {
+                                sh 'sonar-scanner
+                                    -Dsonar.projectKey=${service}
+                                    -Dsonar.sources= ${sourceDir}
+                                    -Dsonar.host.url=${SONAR_URL}'
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-    stage('Deploy k8s') {
+
+    stage('Build and Push Docker Images') {
         steps {
             script {
-    			kubeconfig(credentialsId: 'k8server', serverUrl: 'https://192.168.49.2:8443') {
-                     echo 'Deploying....'
-                        sh 'kubectl apply -f k8s/backend-deployment.yaml -n jenkins'
-                        sh 'kubectl apply -f k8s/frontend-deployment.yaml -n jenkins'
+                for (service in SERVICES) {
+                    echo "Building and pushing Docker image for ${service}"
+                    sh "docker-compose build ${service}"
+                    sh "docker tag ${service}:latest ${HARBOR_REGISTRY}/${service}:${IMAGE_TAG}"
+                    sh "docker push ${HARBOR_REGISTRY}/${service}:${IMAGE_TAG}"
                 }
+            }
+        }
+    }
+
+    stage('scan with trivy') {
+        steps {
+            script {
+                for (service in SERVICES) {
+                    echo "Trivy Security Scan"
+                    sh "trivy --severity HIGH,CRITICAL --no-progress image --format json -o ${service}-trivy-report.json ${HARBOR_REGISTRY}/${service}:${IMAGE_TAG}"
+                }
+            }
+        }
+    }
+
+    stage('Deploy with dockercompose') {
+        steps {
+            script {
+                echo 'Deploying services using Docker Compose...'
+                sh "docker-compose down"
+                sh "docker-compose up -d"
+                sh "sleep 10"
             }
         }
     }
