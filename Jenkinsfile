@@ -67,20 +67,9 @@ pipeline {
         steps {
             script {
                 for (service in SERVICES) {
-                    echo "Trivy Security Scan"
+                    echo "Trivy Security Scan for ${service}"
                     sh "trivy --severity HIGH,CRITICAL --no-progress image --format json -o ${service}-trivy-report.json ${HARBOR_REGISTRY}/${service}:${IMAGE_TAG}"
                 }
-            }
-        }
-    }
-
-    stage('Deploy with dockercompose') {
-        steps {
-            script {
-                echo 'Deploying services using Docker Compose...'
-                sh "docker-compose down"
-                sh "docker-compose up -d"
-                sh "sleep 10"
             }
         }
     }
