@@ -13,6 +13,7 @@ pipeline {
       SERVICES = ['auth-service', 'camera-service', 'device-service', 'file-service', 'task-service', 'user-service', 'ui']
       HARBOR_USERNAME =
       HARBOR_PASSWORD =
+      K8S_MANIFESTS = ['userdb-deployment.yml', 'uiapp-deployment.yml']
 
   }
   stages {
@@ -73,6 +74,35 @@ pipeline {
             }
         }
     }
+
+     stage('Update Deployment File') {
+        environment {
+            GIT_REPO_NAME = "group20"
+            GIT_USER_NAME = "ellie21520813"
+        }
+        steps {
+            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                dir("k8s") {
+                    for (k8s_manifest in K8S_MANIFESTS) {
+                        def mnf_service = (k8s_manifest == 'userdb-deployment.yaml') ? 'user-service' : 'ui-app'
+                        echo "Updating image tag for ${mnf_service} in ${k8s_manifest}"
+                        sh '''
+                            git config user.email "215220813@gm.uit.edu.vn"
+                            git config user.name "${GIT_USER_NAME}"
+                            BUILD_NUMBER=${BUILD_NUMBER}
+                            sed -i "s|${HARBOR_REGISTRY}/${mnf_service}:.*|${HARBOR_REGISTRY}/${mnf_service}:${BUILD_NUMBER}|g" ${k8s_manifest}
+                        '''
+                        // sed -i "s+${HARBOR_REGISTRY}/${mnf_service}.*+${HARBOR_REGISTRY}/${mnf_service}:${BUILD_NUMBER}+g" ${k8s_manifest}
+                    }
+                    sh '''
+                        git add .
+                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                    '''
+                }
+            }
+        }
+     }
   }
 }
 
