@@ -9,6 +9,7 @@ pipeline {
       HARBOR_REGISTRY = 'harbor.example.com'
       SCANNER_HOME= tool 'sonarqube-t3'
       SONAR_URL= ""
+      SONAR_TOKEN=""
       DOCKER_COMPOSE_FILE = 'docker-compose.yml'
       SERVICES = ['auth-service', 'camera-service', 'device-service', 'file-service', 'task-service', 'user-service', 'ui']
       HARBOR_USERNAME =
@@ -36,6 +37,27 @@ pipeline {
             script {
                 for (service in SERVICES) {
                     echo "Running SonarQube analysis for ${service}"
+                    dir("${service}") {
+                        sh """
+                            ${SCANNER_HOME}/bin/sonar-scanner -X \
+                            -Dsonar.host.url=${SONAR_URL} \
+                            -Dsonar.login= ${SONAR_TOKEN}\
+                            -Dsonar.projectName=${service} \
+                            -Dsonar.java.binaries=. \
+                            -Dsonar.projectKey=${service}
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+
+    /*stage('Static Code Analysis') {
+        steps {
+            script {
+                for (service in SERVICES) {
+                    echo "Running SonarQube analysis for ${service}"
                     def sourceDir = (service == 'ui') ? 'src' : 'app'
                         dir("${service}") {
                             withSonarQubeEnv('SonarQube') {
@@ -50,15 +72,15 @@ pipeline {
             }
         }
     }
-
+    */
     stage('Build and Push Docker Images') {
         steps {
             script {
                 for (service in SERVICES) {
                     echo "Building and pushing Docker image for ${service}"
                     sh "docker-compose build ${service}"
-                    sh "docker tag ${service}:latest ${HARBOR_REGISTRY}/${service}:${IMAGE_TAG}"
-                    sh "docker push ${HARBOR_REGISTRY}/${service}:${IMAGE_TAG}"
+                    sh "docker tag ${service}:latest ${HARBOR_REGISTRY}/${service}:${BUILD_NUMBER}"
+                    sh "docker push ${HARBOR_REGISTRY}/${service}:${BUILD_NUMBER}"
                 }
             }
         }
