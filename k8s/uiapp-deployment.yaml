@@ -1,89 +1,177 @@
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 apiVersion: apps/v1
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 kind: Deployment
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 metadata:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   name: uiapp-deploy
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   labels:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
     name: uiapp-deploy
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 spec:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   replicas: 1
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   selector:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
     matchLabels:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
       app: uiapp
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   template:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
     metadata:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
       labels:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
         app: uiapp
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
     spec:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
       containers:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
       - name: uiapp
-|              image: harbor.securityzone.kh:8030/demo/ui-app:118
+
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
         imagePullPolicy: Always
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
         ports:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
         - containerPort: 80
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
         env:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_API_URL
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-api-url
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_BASE_URL
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-base-url
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: ESLINT_NO_DEV_ERRORS
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: eslint-no-dev-errors
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_ASSETS_BUCKET
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-assets-bucket
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_BE
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-be
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_DEVICE_COMMAND_TOKEN
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-device-command-token
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_MQTT_CONNECTION
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-mqtt-connection
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_MQTT_PASSWORD
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-mqtt-password
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: REACT_APP_MQTT_USER
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: react-app-mqtt-user
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
           - name: TSC_COMPILE_ON_ERROR
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
             valueFrom:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
               secretKeyRef:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 name: uiapp-secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
                 key: tsc-compile-on-error
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
       imagePullSecrets:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
         - name: regcred
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 # Secret for Docker registry credentials
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 ---
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 apiVersion: v1
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 kind: Secret
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 metadata:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   name: regcred
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 type: kubernetes.io/dockerconfigjson
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 data:
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
   .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJyZWcudWl0aW90LnZuIjogewoJCQkiYXV0aCI6ICJNakUxTWpJeE5URTZTMmh2Ym1kamFHOHgiCgkJfSwKCQkicmVnaXN0cnktaGFyYm9yLm5nb2RhdDAxMDMubWUiOiB7CgkJCSJhdXRoIjogImEyaGhZMmgxZVRwTVJ5Y2lNVGt5SVdKMlBsMURmajV3IgoJCX0KCX0KfQ==
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 # Service for exposing the deployment
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 
+mage: harbor.securityzone.kh:8030/demo/ui-app:119
 
