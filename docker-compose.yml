@@ -99,7 +99,7 @@ services:
     build:
       context: ./auth-service
       network: host
-    image: "${REGISTRY_URL}/auth-service"
+    image: "${HARBOR_REGISTRY}/auth-service"
     restart: always
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     volumes:
@@ -120,7 +120,7 @@ services:
     build: 
       context: ./user-service
       network: host
-    image: "${REGISTRY_URL}/user-service"
+    image: "${HARBOR_REGISTRY}/user-service"
     restart: always
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     volumes:
@@ -140,7 +140,7 @@ services:
     build: 
       context: ./file-service
       network: host
-    image: "${REGISTRY_URL}/file-service"
+    image: "${HARBOR_REGISTRY}/file-service"
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     restart: always
     volumes:
@@ -160,7 +160,7 @@ services:
     build:
       context: ./task-service
       network: host
-    image: "${REGISTRY_URL}/task-service"
+    image: "${HARBOR_REGISTRY}/task-service"
     restart: always
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     volumes:
@@ -183,7 +183,7 @@ services:
     build:
       context: ./device-service
       network: host
-    image: "${REGISTRY_URL}/device-service"
+    image: "${HARBOR_REGISTRY}/device-service"
     restart: always
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port ${DEVI_PORT}
     volumes:
@@ -210,7 +210,7 @@ services:
     build:
       context: ./camera-service
       network: host
-    image: "${REGISTRY_URL}/camera-service"
+    image: "${HARBOR_REGISTRY}/camera-service"
     restart: always
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port ${CAM_PORT}
     volumes:
@@ -222,7 +222,7 @@ services:
 
   ui-app:
     build: ./ui
-    image: "${REGISTRY_URL}/ui-app"
+    image: "${HARBOR_REGISTRY}/ui-app"
     restart: always
     command: serve build
     volumes:
