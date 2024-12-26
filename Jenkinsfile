@@ -28,6 +28,8 @@ pipeline {
     stage('login harbor') {
         steps {
             echo 'Login to Harbor registry'
+            touch /etc/docker/daemon.json
+            echo '{"insecure-registries" : ["10.30.182.30:8030"]}' > /etc/docker/daemon.json
             sh" docker login ${HARBOR_REGISTRY} -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD}"
         }
     }
@@ -78,7 +80,7 @@ pipeline {
             script {
                 for (service in SERVICES) {
                     echo "Building and pushing Docker image for ${service}"
-                    sh "docker-compose build ${service}"
+                    sh "docker compose build ${service}"
                     sh "docker tag ${service}:latest ${HARBOR_REGISTRY}/${service}:${BUILD_NUMBER}"
                     sh "docker push ${HARBOR_REGISTRY}/${service}:${BUILD_NUMBER}"
                 }
