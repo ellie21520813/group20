@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: user-api
-        image: harbor.securityzone.kh:8030/demo/user-service:122
+          image: harbor.securityzone.kh:8030/demo/user-service:123
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
