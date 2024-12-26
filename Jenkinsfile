@@ -16,6 +16,8 @@ pipeline {
       HARBOR_PASSWORD =
       K8S_MANIFESTS = ['userdb-deployment.yml', 'uiapp-deployment.yml']
 
+      
+
   }
   stages {
     stage('Checkout') {
@@ -114,7 +116,7 @@ pipeline {
                             git config user.email "215220813@gm.uit.edu.vn"
                             git config user.name "${GIT_USER_NAME}"
                             BUILD_NUMBER=${BUILD_NUMBER}
-                            sed -i "s|${HARBOR_REGISTRY}/${mnf_service}:.*|${HARBOR_REGISTRY}/${mnf_service}:${BUILD_NUMBER}|g" ${k8s_manifest}
+                            sed -i "s|${HARBOR_REGISTRY}/${mnf_service}:.*| ${HARBOR_REGISTRY}/${IMAGE_GROUP}/${mnf_service}:${BUILD_NUMBER}|g" ${k8s_manifest}
                         '''
                         // sed -i "s+${HARBOR_REGISTRY}/${mnf_service}.*+${HARBOR_REGISTRY}/${mnf_service}:${BUILD_NUMBER}+g" ${k8s_manifest}
                     }

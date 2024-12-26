@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: user-api
-          image: reg.uitiot.vn/mod-edge/user-service
+          image: harbor.securityzone.kh:8030/demo/user-service
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

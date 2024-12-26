@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: uiapp
-        image: reg.uitiot.vn/mod-edge/ui-app
+        image: harbor.securityzone.kh:8030/demo/ui-app
         imagePullPolicy: Always
         ports:
         - containerPort: 80
