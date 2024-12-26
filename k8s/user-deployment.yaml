@@ -1,153 +1,43 @@
-mage: harbor.securityzone.kh:8030/demo/user-service:119
 apiVersion: apps/v1
-mage: harbor.securityzone.kh:8030/demo/user-service:119
 kind: Deployment
-mage: harbor.securityzone.kh:8030/demo/user-service:119
 metadata:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  name: user-deploy
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+  name: userdb-deployment
   labels:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-    name: user-deploy
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+    name: userdb
 spec:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
   replicas: 1
-mage: harbor.securityzone.kh:8030/demo/user-service:119
   selector:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
     matchLabels:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-      app: user-api
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+      service: userdb
   template:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
     metadata:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
       labels:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-        app: user-api
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+        service: userdb
     spec:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
       containers:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-        - name: user-api
-
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+        - image: postgres:latest
           imagePullPolicy: Always
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-          ports:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-            - containerPort: 8000
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-          volumeMounts:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-            - name: env-file
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-              readOnly: true
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-              mountPath: "/app/.env"
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-              subPath: .env
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+          name: postgres
           env:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-            - name: POSTGRES_HOST
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+            - name: POSTGRES_USER
               valueFrom:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
                 secretKeyRef:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-                  key: host
-mage: harbor.securityzone.kh:8030/demo/user-service:119
                   name: userdb-secret
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-            - name: POSTGRES_PORT
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+                  key: user
+            - name: POSTGRES_PASSWORD
               valueFrom:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
                 secretKeyRef:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-                  key: port
-mage: harbor.securityzone.kh:8030/demo/user-service:119
                   name: userdb-secret
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-      imagePullSecrets:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-        - name: regcred
-mage: harbor.securityzone.kh:8030/demo/user-service:119
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: userdb-secret
+                  key: db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: userdb-volume-mount
       volumes:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-        - name: env-file
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-          secret:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-            secretName: fastapi-userdb-cred
-mage: harbor.securityzone.kh:8030/demo/user-service:119
----
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-apiVersion: v1
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-kind: Secret
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-metadata:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  name: regcred
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-type: kubernetes.io/dockerconfigjson
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-data:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJyZWcudWl0aW90LnZuIjogewoJCQkiYXV0aCI6ICJNakUxTWpJeE5URTZTMmh2Ym1kamFHOHgiCgkJfSwKCQkicmVnaXN0cnktaGFyYm9yLm5nb2RhdDAxMDMubWUiOiB7CgkJCSJhdXRoIjogImEyaGhZMmgxZVRwTVJ5Y2lNVGt5SVdKMlBsMURmajV3IgoJCX0KCX0KfQ==
-mage: harbor.securityzone.kh:8030/demo/user-service:119
----
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-apiVersion: v1
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-kind: Secret
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-metadata:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  name: fastapi-userdb-cred
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  namespace: default
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-stringData:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  .env: |
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-    DATABASE_URL=postgresql://admin:Khongcho1@userdb-svc:5432/
-mage: harbor.securityzone.kh:8030/demo/user-service:119
----
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-apiVersion: v1
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-kind: Service
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-metadata:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  name: user-svc
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  labels:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-    service: user-svc
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-spec:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  type: ClusterIP
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  ports:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-    - name: tcp-port
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-      port: 8002
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-      targetPort: 8000
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-      protocol: TCP
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-  selector:
-mage: harbor.securityzone.kh:8030/demo/user-service:119
-    app: user-api
+        - name: userdb-volume-mount
+          persistentVolumeClaim:
+            claimName: userdb-pvc
