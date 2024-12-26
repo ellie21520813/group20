@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: uiapp
-        image: harbor.securityzone.kh:8030/demo/ui-app
+/        image: harbor.securityzone.kh:8030/demo/ui-app:108
         imagePullPolicy: Always
         ports:
         - containerPort: 80
