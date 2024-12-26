@@ -234,8 +234,8 @@ services:
     image: michayaak/spring-boot-admin:2.2.3-1
     restart: always
     ports:
-    - "8080:8080"
-    - "8081:8081"
+    - "9500:9500"
+    - "9501:9501"
     hostname: spring-admin
     networks: 
       - mynet

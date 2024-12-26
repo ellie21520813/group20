@@ -62,7 +62,7 @@ pipeline {
                     echo "Running SonarQube analysis for ${service}"
                     def sourceDir = (service == 'ui') ? 'src' : 'app'
                         dir("${service}") {
-                            withSonarQubeEnv('SonarQube') {
+                            withSonarQubeEnv('sonarqube') {
                                 sh 'sonar-scanner
                                     -Dsonar.projectKey=${service}
                                     -Dsonar.sources= ${sourceDir}
